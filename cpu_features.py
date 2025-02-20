@@ -1,18 +1,32 @@
+import subprocess
+import sys
+import platform
+
+# Function to install missing packages
+def install_package(package,packagename=""):
+    try:
+        __import__(package)
+    except ImportError:
+        print(f"Installing {packagename}...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", packagename])
+
+# Ensure required packages are installed
+install_package("psutil","psutil")
+install_package("cpuinfo","py-cpuinfo")
+
 import psutil
 import cpuinfo
-import subprocess
-import platform
 
 def get_l1_cache():
     try:
         system = platform.system()
-        if system == "Windows": #windows
-            #using powershell command
-            output = subprocess.check_output(["powershell", "-Command",
-                                              "(Get-WmiObject Win32_CacheMemory | Where-Object { $_.Level -eq 3 }).MaxCacheSize"],
-                                             shell=True, text=True)
+        if system == "Windows":  # Windows
+            output = subprocess.check_output([
+                "powershell", "-Command",
+                "(Get-WmiObject Win32_CacheMemory | Where-Object { $_.Level -eq 3 }).MaxCacheSize"
+            ], shell=True, text=True)
             return int(output.strip()) * 1024 if output.strip().isdigit() else None
-        elif system == "Linux": #linux
+        elif system == "Linux":  # Linux
             output = subprocess.check_output("lscpu | grep 'L1d cache'", shell=True, text=True)
             return int(output.split(":")[1].strip().replace("K", "")) * 1024
         elif system == "Darwin":  # macOS
