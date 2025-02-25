@@ -35,9 +35,16 @@ def get_l1_cache():
     except Exception as e:
         print(f"L1 Cache Error: {e}")
         return None
+def get_mac_cache_size(level):
+    try:
+        output = subprocess.check_output(f"sysctl -n hw.l{level}cachesize", shell=True, text=True)
+        return int(output.strip())
+    except Exception:
+        return None
 
 def get_cpu_info():
     info = cpuinfo.get_cpu_info()
+    # print(info)
     print(f"Processor: {info['brand_raw']}")
     print(f"Architecture: {info['arch']} ({info['bits']}-bit)")
     print(f"Logical Cores (Threads): {psutil.cpu_count(logical=True)}")
@@ -51,5 +58,8 @@ def get_cpu_info():
     if 'l3_cache_size' in info:
         print(f"L3 Cache: {info['l3_cache_size']} bytes")
 
+    # print("l1 = ",get_mac_cache_size(1))
+    print("l2 = ",get_mac_cache_size(2))
+    print("l3 = ",get_mac_cache_size(3))
 if __name__ == "__main__":
     get_cpu_info()
